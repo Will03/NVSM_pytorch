@@ -35,6 +35,8 @@ def evaluate_queries_bert(nvsm, queries_text, doc_names, tokenizer,
     results          = []
     document_indices = torch.stack([torch.arange(len(doc_names))] * batch_size)
     document_indices = document_indices.to(device)
+    print('---')
+    print(document_indices)
     for (queries, mask) in test_loader:
         queries = queries.to(device)
         mask    = mask.to(device)

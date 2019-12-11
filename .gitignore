@@ -3,4 +3,5 @@ glove/
 /models/nvsm_bert.pt
 /Willll/doc/
 /Willll/test/
-/Willll/docs/
+build/
+/src/models/__pycache__/

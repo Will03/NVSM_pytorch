@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: src
+Version: 0.1.0
+Summary: A PyTorch implementation of the Neural Vector Space Model (https://arxiv.org/abs/1708.02702)
+Home-page: UNKNOWN
+Author: Grégory Châtel, Disaitek
+Author-email: UNKNOWN
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
