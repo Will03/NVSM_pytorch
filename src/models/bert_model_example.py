@@ -1,7 +1,7 @@
 import pickle
 from pathlib import Path
 
-import torch
+import torch,os,re
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
@@ -13,14 +13,29 @@ from evaluate_bert  import evaluate_queries_bert
 
 from nvsm_bert import NVSMBERT, loss_function
 
-from pytorch_pretrained_bert import BertTokenizer
-from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
+from transformers import BertTokenizer
+#from transformers.optimization import BertAdam
+#from pytorch_pretrained_bert import BertTokenizer
+from pytorch_pretrained_bert.optimization import BertAdam
+
+def articleParser(myPath):
+    with open(myPath, 'r') as fp:
+        docData = fp.read().replace('\n', '')
+    data = re.sub(r'[0-9_!@#$%^&*()\[\]<>=/;\-"\',.:~]', '', docData).lower()
+    return data
 
 def load_data(data_folder, pretrained_model):
     tokenizer = BertTokenizer.from_pretrained(pretrained_model)
-    with open(data_folder / 'tokenized_docs_bert.pkl', 'rb') as tok_docs_file:
-        docs = pickle.load(tok_docs_file)
-
+    #with open(data_folder / 'tokenized_docs.pkl', 'rb') as tok_docs_file:
+    #     docs = pickle.load(tok_docs_file)
+    docFiles = os.listdir(data_folder)
+    docs = []
+    for docFileName in docFiles:
+        tmpDict = {}
+        docWordList = articleParser(data_folder / docFileName).split()
+        tmpDict['name'] = docFileName
+        tmpDict['tokens'] = docWordList
+        docs.append(tmpDict)
     return docs, tokenizer
 
 def create_dataset(tok_docs, tokenizer, n):
@@ -34,7 +49,7 @@ def create_dataset(tok_docs, tokenizer, n):
     cls_tok_id   = tokenizer.vocab['[CLS]']
     sep_tok_id   = tokenizer.vocab['[SEP]']
     for i, doc in enumerate(tok_docs):
-        doc_tok_ids = [tokenizer.vocab[tok] for tok in doc]
+        doc_tok_ids = tokenizer.encode(' '.join(doc))[1:-1]
         for n_gram in [doc_tok_ids[i : i + n] for i in range(len(doc) - n)]:
             if all(tok == unk_tok_id for tok in n_gram):
                 continue
@@ -44,10 +59,12 @@ def create_dataset(tok_docs, tokenizer, n):
     return n_grams, document_ids
 
 def main():
+    mypath = r'C:/Users/willll/Desktop/WIillll/IRCLass/Final/NVSM_pytorch'
     pretrained_model      = 'bert-base-uncased'
-    glove_path            = Path('../../glove')
-    model_folder          = Path('../../models')
-    data_folder           = Path('../../data/processed')
+    glove_path            = Path(mypath + '/glove')
+    model_folder          = Path(mypath + '/models')
+   # data_folder           = Path(mypath + '/data/processed')
+    data_folder           = Path(mypath + '/willll/fakedoc')
     model_path            = model_folder / 'nvsm_bert.pt'
     batch_size            = 140 # for 150, 8053 / 8113MB GPU memory, to tweak
     epochs                = 3
