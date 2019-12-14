@@ -68,8 +68,9 @@ def create_dataset(tok_docs, tokenizer, n):
     return n_grams, document_ids
 
 def main():
-    mypath = r'/home/connlab/108IR/will/final/NVSM_pytorch/'
-    #mypath = r'C:/Users/willll/Desktop/WIillll/IRCLass/Final/NVSM_pytorch'
+    #mypath = r'/home/connlab/108IR/will/final/NVSM_pytorch/'
+    mypath = r'C:/Users/willll/Desktop/WIillll/IRfinal/NVSM_pytorch'
+    print(mypath)
     pretrained_model      = 'bert-base-uncased'
     glove_path            = Path(mypath + '/glove')
     model_folder          = Path(mypath + '/models')
@@ -148,7 +149,7 @@ def main():
     
 
     
-    evaluation_results = evaluate_queries_bert(
+    evaluation_results,ranksResults = evaluate_queries_bert(
         nvsm,
         queries_text,
         doc_names,
@@ -156,8 +157,17 @@ def main():
         batch_size,
         device
     )
+    print(evaluation_results)
+    # print(len(ranksResults))
     for query_name,query_text, doc_idx in zip(queries_name,queries_text, evaluation_results):
         print(f'{query_name} {query_text:35} -> {doc_names[doc_idx]}')
+
+    with open(mypath + './Willll/result.txt','w') as f:
+        f.write('Query,RetrievedDocuments\n')
+        resuList = ' '
+        for qIndex,qName in enumerate(queries_name):
+            f.write(f'{qName},')
+            f.write(f'{resuList.join(doc_names[x] for x in ranksResults[qIndex])}\n')
 
 if __name__ == '__main__':
     main()

@@ -59,8 +59,8 @@ def create_dataset(tok_docs, tokenizer, n):
     return n_grams, document_ids
 
 def main():
-    mypath = r'/home/connlab/108IR/will/final/NVSM_pytorch/'
-    #mypath = r'C:/Users/willll/Desktop/WIillll/IRCLass/Final/NVSM_pytorch'
+    #mypath = r'/home/connlab/108IR/will/final/NVSM_pytorch/'
+    mypath = r'C:/Users/willll/Desktop/WIillll/IRCLass/Final/NVSM_pytorch'
     pretrained_model      = 'bert-base-uncased'
     glove_path            = Path(mypath + '/glove')
     model_folder          = Path(mypath + '/models')

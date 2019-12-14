@@ -43,6 +43,7 @@ class NVSM(ABC, nn.Module):
             query_proj = query_proj.unsqueeze(-1)
         dot_product   = torch.bmm(document_emb, query_proj)
         similarity    = torch.sigmoid(dot_product)
+        # print(similarity)
 
         return similarity.squeeze()
 

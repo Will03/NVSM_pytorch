@@ -33,11 +33,13 @@ def evaluate_queries_bert(nvsm, queries_text, doc_names, tokenizer,
     query_dataset    = create_query_dataset(queries_text, tokenizer)
     test_loader      = DataLoader(query_dataset, batch_size = batch_size)
     results          = []
+    ranksResults     = [] 
     document_indices = torch.stack([torch.arange(len(doc_names))] * batch_size)
     document_indices = document_indices.to(device)
-    print('---')
-    print(document_indices)
+    #print(document_indices)
+
     for (queries, mask) in test_loader:
+
         queries = queries.to(device)
         mask    = mask.to(device)
         result  = nvsm.representation_similarity(
@@ -46,5 +48,9 @@ def evaluate_queries_bert(nvsm, queries_text, doc_names, tokenizer,
             attention_mask = mask
         )
         results.extend(list(result.argmax(dim = 1).cpu().numpy()))
+        resultRank = list(result.argsort(descending=True,dim = 1).cpu().numpy())
+        
+        for eachQ in resultRank:
+            ranksResults.append(eachQ[:100])
 
-    return results
+    return results,ranksResults
