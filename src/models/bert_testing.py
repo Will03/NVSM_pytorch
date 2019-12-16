@@ -28,16 +28,24 @@ def load_data(data_folder, testing_query_folder,pretrained_model):
     tokenizer = BertTokenizer.from_pretrained(pretrained_model)
     #with open(data_folder / 'tokenized_docs.pkl', 'rb') as tok_docs_file:
     #     docs = pickle.load(tok_docs_file)
-    docFiles = os.listdir(data_folder)
-    docs = []
-    for docFileName in docFiles:
-        tmpDict = {}
-        docWordList = articleParser(data_folder / docFileName).split()
-        tmpDict['name'] = docFileName
-        tmpDict['tokens'] = docWordList
-        docs.append(tmpDict)
-    
+#------------------------------------------------------
+    # docFiles = os.listdir(data_folder)
+    # docFiles.sort()
+    # docs = []
+    # for docFileName in docFiles:
+    #     tmpDict = {}
+    #     docWordList = articleParser(data_folder / docFileName).split()
+    #     tmpDict['name'] = docFileName
+    #     tmpDict['tokens'] = docWordList
+    #     docs.append(tmpDict)
+#------------------------------------------------------
+    docs =[]
+    with open(dataPath+'DocuStore.txt', 'rb') as file:
+        docs =pickle.load(file)
+    docs['tokens'] = docs.pop('token')
+#------------------------------------------------------
     queryFiles = os.listdir(testing_query_folder)
+    queryFiles.sort()
     query = []
     for queryFileName in queryFiles:
         tmpQuery = {}

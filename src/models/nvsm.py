@@ -33,6 +33,8 @@ class NVSM(ABC, nn.Module):
         '''
         query_proj   = self.query_embedding(query, **query_kwargs)
         document_emb = self.doc_emb(document)
+        print(document_emb)
+        print(document_emb.shape)
         # If we have a single document to match against each query, we have
         # to reshape the tensor to compute a simple dot product.
         # Otherwise, we compute a simple matrix multiplication to match the

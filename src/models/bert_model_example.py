@@ -24,19 +24,36 @@ def articleParser(myPath):
     data = re.sub(r'[0-9_!@#$%^&*()\[\]<>=/;\-"\',.:~]', '', docData).lower()
     return data
 
-def load_data(data_folder, pretrained_model):
+def load_data(data_folder, testing_query_folder,pretrained_model):
     tokenizer = BertTokenizer.from_pretrained(pretrained_model)
     #with open(data_folder / 'tokenized_docs.pkl', 'rb') as tok_docs_file:
     #     docs = pickle.load(tok_docs_file)
-    docFiles = os.listdir(data_folder)
-    docs = []
-    for docFileName in docFiles:
-        tmpDict = {}
-        docWordList = articleParser(data_folder / docFileName).split()
-        tmpDict['name'] = docFileName
-        tmpDict['tokens'] = docWordList
-        docs.append(tmpDict)
-    return docs, tokenizer
+#------------------------------------------------------
+    # docFiles = os.listdir(data_folder)
+    # docFiles.sort()
+    # docs = []
+    # for docFileName in docFiles:
+    #     tmpDict = {}
+    #     docWordList = articleParser(data_folder / docFileName).split()
+    #     tmpDict['name'] = docFileName
+    #     tmpDict['tokens'] = docWordList
+    #     docs.append(tmpDict)
+#------------------------------------------------------
+    docs =[]
+    with open(dataPath+'DocuStore.txt', 'rb') as file:
+        docs =pickle.load(file)
+    docs['tokens'] = docs.pop('token')
+#------------------------------------------------------
+    queryFiles = os.listdir(testing_query_folder)
+    queryFiles.sort()
+    query = []
+    for queryFileName in queryFiles:
+        tmpQuery = {}
+        queryWords = articleParser(testing_query_folder / queryFileName)
+        tmpQuery['name'] = queryFileName
+        tmpQuery['tokens'] = queryWords
+        query.append(tmpQuery)
+    return docs, query,tokenizer
 
 def create_dataset(tok_docs, tokenizer, n):
     '''
@@ -66,11 +83,13 @@ def main():
     model_folder          = Path(mypath + '/models')
    # data_folder           = Path(mypath + '/data/processed')
     data_folder           = Path(mypath + '/Willll/fakedoc')
+    testing_query_folder  = Path(mypath + '/Willll/test/query')
     model_path            = model_folder / 'nvsm_bert.pt'
     batch_size            = 140 # for 150, 8053 / 8113MB GPU memory, to tweak
-    epochs                = 3
-    docs, tokenizer       = load_data(
+    epochs                = 1
+    docs, queries ,tokenizer       = load_data(
         data_folder,
+        testing_query_folder,
         pretrained_model
     )
     # docs = docs[:20]
@@ -78,7 +97,7 @@ def main():
     n_grams, document_ids = create_dataset(
         tok_docs  = [doc['tokens'] for doc in docs],
         tokenizer = tokenizer,
-        n         = 10
+        n         = 30
     )
     print('N-grams number', len(n_grams))
     k_values              = [1, 3, 5, 10]
@@ -122,7 +141,7 @@ def main():
         k_values      = k_values,
         loss_function = loss_function,
         lamb          = lamb,
-        print_every   = 500
+        print_every   = 10000
     )
     torch.save(nvsm.state_dict(), model_path)
     nvsm.eval()
@@ -134,24 +153,8 @@ def main():
         loss_function = loss_function,
     )
     print(generate_eval(k_values, recall_at_ks))
-    queries_text          = [
-        'violence king louis decapitated',
-        'domain language translate',
-        'governement robespierre',
-        'perfect imperfect information',
-        'ontology translation',
-        'high levels of political violence',
-        'state education system which promotes civic values',
-        'political struggles',
-        'Almost all future revolutionary movements looked back to the Revolution as their predecessor',
-        'Habermas argued that the dominant cultural model in 17th century France was a "representational" culture',
-        'mathematical model winning strategy',
-        'solutions for two-person zero-sum games',
-        'cooperative coalitions bargaining',
-        'eigenvalue',
-        'graph, dimension and components',
-        'inner product vertex'
-    ]
+    queries_text             = [query['tokens'] for query in queries]
+    queries_name             = [query['name'] for query in queries]
     evaluation_results = evaluate_queries_bert(
         nvsm,
         queries_text,
@@ -160,8 +163,17 @@ def main():
         batch_size,
         device
     )
-    for query, doc_idx in zip(queries_text, evaluation_results):
-        print(f'{query:35} -> {doc_names[doc_idx]}')
+    print(evaluation_results)
+    # print(len(ranksResults))
+    for query_name,query_text, doc_idx in zip(queries_name,queries_text, evaluation_results):
+        print(f'{query_name} {query_text:35} -> {doc_names[doc_idx]}')
+
+    with open(mypath + './Willll/result.txt','w') as f:
+        f.write('Query,RetrievedDocuments\n')
+        resuList = ' '
+        for qIndex,qName in enumerate(queries_name):
+            f.write(f'{qName},')
+            f.write(f'{resuList.join(doc_names[x] for x in ranksResults[qIndex])}\n')
 
 if __name__ == '__main__':
     main()

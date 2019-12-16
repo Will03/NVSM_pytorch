@@ -3,5 +3,7 @@ glove/
 /models/nvsm_bert.pt
 /Willll/doc/
 /Willll/test/
+/Willll/split12000doc/
+/Willll/DocuStore.txt
 build/
 /src/models/__pycache__/
